@@ -45,6 +45,10 @@ func TestScores(t *testing.T) {
 
 	km = kmeans.New()
 	estimate, err := EstimateK(d, km)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	if estimate.K != 3 {
 		t.Errorf("Expected k-value of 3, got %d", estimate.K)
 	}
