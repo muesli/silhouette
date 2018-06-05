@@ -46,7 +46,7 @@ func Scores(data clusters.Observations, m Partitioner) ([]Score, error) {
 	for n := 2; n < 10; n++ {
 		cc, err := m.Partition(data, n)
 		if err != nil {
-			return []Score{Score{K: 0, Score: -1.0}}, err
+			return []Score{{K: 0, Score: -1.0}}, err
 		}
 
 		var si float64
