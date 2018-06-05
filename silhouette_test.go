@@ -36,21 +36,20 @@ func TestScores(t *testing.T) {
 	}
 
 	km := kmeans.New()
-	scores, err := Scores(d, km)
+	scores, err := Scores(d, 8, km)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	Plot(scores)
+	Plot("silhouette.png", scores)
 
 	km = kmeans.New()
-	estimate, err := EstimateK(d, km)
+	estimate, _, err := EstimateK(d, 8, km)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if estimate.K != 3 {
-		t.Errorf("Expected k-value of 3, got %d", estimate.K)
+	if estimate != 3 {
+		t.Errorf("Expected k-value of 3, got %d", estimate)
 	}
-	// fmt.Printf("Best estimate: %+v %v\n", estimate, err)
 }

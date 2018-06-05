@@ -13,22 +13,26 @@ import (
 	"github.com/wcharczuk/go-chart/drawing"
 )
 
-type Score struct {
+// KScore holds the score for a value of K
+type KScore struct {
 	K     int
 	Score float64
 }
 
+// Partitioner interface which suitable clustering algorithms should implement
 type Partitioner interface {
 	Partition(data clusters.Observations, k int) (clusters.Clusters, error)
 }
 
-func EstimateK(data clusters.Observations, m Partitioner) (Score, error) {
-	scores, err := Scores(data, m)
+// EstimateK estimates the amount of clusters (k) along with the silhouette
+// score for that value, using the given partitioning algorithm
+func EstimateK(data clusters.Observations, kmax int, m Partitioner) (int, float64, error) {
+	scores, err := Scores(data, kmax, m)
 	if err != nil {
-		return Score{}, err
+		return 0, -1.0, err
 	}
 
-	r := Score{
+	r := KScore{
 		K: -1,
 	}
 	for _, score := range scores {
@@ -37,42 +41,54 @@ func EstimateK(data clusters.Observations, m Partitioner) (Score, error) {
 		}
 	}
 
-	return r, nil
+	return r.K, r.Score, nil
 }
 
-func Scores(data clusters.Observations, m Partitioner) ([]Score, error) {
-	var r []Score
+// Scores calculates the silhouette scores for all values of k between 2 and
+// kmax, using the given partitioning algorithm
+func Scores(data clusters.Observations, kmax int, m Partitioner) ([]KScore, error) {
+	var r []KScore
 
-	for n := 2; n < 10; n++ {
-		cc, err := m.Partition(data, n)
+	for k := 2; k <= kmax; k++ {
+		s, err := Score(data, k, m)
 		if err != nil {
-			return []Score{{K: 0, Score: -1.0}}, err
+			return r, err
 		}
 
-		var si float64
-		var sc int64
-		for ci, c := range cc {
-			for _, p := range c.Observations {
-				ai := clusters.AverageDistance(p, c.Observations)
-				_, bi := cc.Neighbour(p, ci)
-
-				si += (bi - ai) / math.Max(ai, bi)
-				sc++
-			}
-		}
-
-		sd := si / float64(sc)
-		r = append(r, Score{
-			K:     n,
-			Score: sd,
+		r = append(r, KScore{
+			K:     k,
+			Score: s,
 		})
 	}
 
-	// fmt.Printf("%+v\n", r)
 	return r, nil
 }
 
-func Plot(scores []Score) {
+// Score calculates the silhouette score for a given value of k, using the given
+// partitioning algorithm
+func Score(data clusters.Observations, k int, m Partitioner) (float64, error) {
+	cc, err := m.Partition(data, k)
+	if err != nil {
+		return -1.0, err
+	}
+
+	var si float64
+	var sc int64
+	for ci, c := range cc {
+		for _, p := range c.Observations {
+			ai := clusters.AverageDistance(p, c.Observations)
+			_, bi := cc.Neighbour(p, ci)
+
+			si += (bi - ai) / math.Max(ai, bi)
+			sc++
+		}
+	}
+
+	return si / float64(sc), nil
+}
+
+// Plot creates a graph of the silhouette scores
+func Plot(filename string, scores []KScore) error {
 	var series []chart.Series
 
 	for _, s := range scores {
@@ -107,10 +123,7 @@ func Plot(scores []Score) {
 	buffer := bytes.NewBuffer([]byte{})
 	err := graph.Render(chart.PNG, buffer)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	err = ioutil.WriteFile("silhouette.png", buffer.Bytes(), 0644)
-	if err != nil {
-		panic(err)
-	}
+	return ioutil.WriteFile(filename, buffer.Bytes(), 0644)
 }
