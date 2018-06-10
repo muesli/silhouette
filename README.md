@@ -3,8 +3,8 @@ Silhouette cluster analysis implementation in Go
 
 ## What It Does
 
-Silhouette refers to an algorithm used to interpret and validate the consistency
-within clusters of data.
+Silhouette refers to an [algorithm](https://en.wikipedia.org/wiki/Silhouette_(clustering))
+used to interpret and validate the consistency within clusters of data.
 
 The silhouette value is a measure of how similar an object is to its own cluster
 compared to other clusters. The silhouette ranges from −1 to +1, where a high
