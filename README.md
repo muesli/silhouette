@@ -55,7 +55,8 @@ for x := 0; x < 64; x++ {
 // it's commonly used with k-means
 km := kmeans.New()
 
-// compute the average silhouette score (coefficient) for 2 to 8 clusters
+// compute the average silhouette score (coefficient) for 2 to 8 clusters, using
+// the k-means clustering algorithm
 scores, err := Scores(d, 8, km)
 for _, s := range scores {
     fmt.Printf("k: %d (score: %.2f)\n", s.K, s.Score)
