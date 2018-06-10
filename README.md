@@ -65,6 +65,9 @@ for _, s := range scores {
 // estimate the amount of clusters in our data set
 // this returns the k with the highest score (where 2 <= k <= 8)
 k, score, err := EstimateK(d, 8, km)
+
+// k is usually 3 for this example, with a score close to 1.0
+// note that k-means doesn't always converge optimally
 ...
 }
 ```
