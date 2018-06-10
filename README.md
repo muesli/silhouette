@@ -25,8 +25,9 @@ configuration may have too many or too few clusters.
 ## Example
 ```go
 import (
-	"github.com/muesli/clusters"
-	"github.com/muesli/kmeans"
+    "github.com/muesli/silhouette"
+    "github.com/muesli/clusters"
+    "github.com/muesli/kmeans"
 )
 
 // initialize your data set
@@ -57,14 +58,14 @@ km := kmeans.New()
 
 // compute the average silhouette score (coefficient) for 2 to 8 clusters, using
 // the k-means clustering algorithm
-scores, err := Scores(d, 8, km)
+scores, err := silhouette.Scores(d, 8, km)
 for _, s := range scores {
     fmt.Printf("k: %d (score: %.2f)\n", s.K, s.Score)
 }
 
 // estimate the amount of clusters in our data set
 // this returns the k with the highest score (where 2 <= k <= 8)
-k, score, err := EstimateK(d, 8, km)
+k, score, err := silhouette.EstimateK(d, 8, km)
 
 // k is usually 3 for this example, with a score close to 1.0
 // note that k-means doesn't always converge optimally
